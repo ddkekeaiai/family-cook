@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>家庭菜单 - 后台管理</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+body{background:#F0F2F5;min-height:100vh}
+.header{background:linear-gradient(135deg,#FF6B35,#FF8F47);color:white;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:20px;font-weight:600}
+.header .sub{font-size:12px;opacity:.8}
+.nav{background:white;display:flex;padding:0 24px;border-bottom:1px solid #E8E8E8;position:sticky;top:0;z-index:10}
+.nav-item{padding:14px 20px;font-size:14px;color:#666;cursor:pointer;border-bottom:3px solid transparent}
+.nav-item.active{color:#FF6B35;border-bottom-color:#FF6B35;font-weight:600}
+.content{padding:20px 24px;max-width:1200px;margin:0 auto}
+.page{display:none}
+.page.active{display:block}
+
+/* 卡片 */
+.card{background:white;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card-title{font-size:16px;font-weight:600;color:#333;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+
+/* 表单 */
+.form-row{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.form-group{margin-bottom:12px}
+.form-group label{font-size:13px;font-weight:500;color:#555;display:block;margin-bottom:4px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:8px 12px;border:2px solid #E8E8E8;border-radius:8px;font-size:13px;outline:none;transition:border .2s}
+.form-group input:focus,.form-group select:focus{border-color:#FF6B35}
+.form-group textarea{min-height:60px;resize:vertical;font-family:inherit}
+
+/* 按钮 */
+.btn{display:inline-flex;align-items:center;gap:4px;padding:8px 20px;border-radius:8px;font-size:13px;cursor:pointer;border:none;font-weight:500;transition:opacity .2s}
+.btn:active{opacity:.8}
+.btn-primary{background:#FF6B35;color:white}
+.btn-success{background:#2ED573;color:white}
+.btn-danger{background:#FF4757;color:white}
+.btn-outline{background:white;color:#FF6B35;border:2px solid #FF6B35}
+.btn-sm{padding:4px 12px;font-size:12px}
+
+/* 表格 */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #F0F0F0}
+th{background:#FAFAFA;font-weight:600;color:#666;font-size:12px}
+tr:hover{background:#FFF8F5}
+.recipe-card{display:flex;gap:12px;padding:12px;border-bottom:1px solid #F0F0F0;align-items:center}
+.recipe-card:last-child{border-bottom:none}
+.rc-icon{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.rc-info{flex:1}
+.rc-name{font-size:14px;font-weight:600;color:#333}
+.rc-meta{font-size:12px;color:#999;margin-top:2px}
+
+/* 弹窗 */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:100;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal-box{background:white;border-radius:16px;padding:24px;width:90%;max-width:560px;max-height:85vh;overflow-y:auto;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal-title{font-size:18px;font-weight:600;margin-bottom:16px}
+
+/* Toast */
+.toast{position:fixed;top:20px;right:20px;background:#2ED573;color:white;padding:12px 24px;border-radius:8px;font-size:14px;z-index:200;display:none;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.toast.show{display:block}
+.toast.error{background:#FF4757}
+
+/* 标签 */
+.tag{padding:2px 10px;border-radius:4px;font-size:11px;display:inline-block}
+.tag-easy{background:#E8F8F0;color:#2ED573}
+.tag-medium{background:#FFF3E0;color:#FFA502}
+.tag-hard{background:#FFE8E8;color:#FF4757}
+
+.ing-line{display:flex;gap:6px;margin-bottom:4px;align-items:center}
+.ing-line input{flex:1;padding:6px 10px;border:1px solid #E8E8E8;border-radius:6px;font-size:12px}
+
+.step-line{display:flex;gap:6px;margin-bottom:6px;align-items:flex-start}
+.step-num{width:24px;height:24px;background:#FF6B35;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.step-line textarea{flex:1;padding:6px 10px;border:1px solid #E8E8E8;border-radius:6px;font-size:12px;min-height:40px;resize:vertical;font-family:inherit}
+
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+.stat-card{background:white;border-radius:10px;padding:16px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.stat-num{font-size:28px;font-weight:700;color:#FF6B35}
+.stat-label{font-size:12px;color:#999;margin-top:4px}
+
+@media(max-width:640px){.content{padding:12px}.nav-item{padding:12px 14px;font-size:13px}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div><h1>🍳 家庭菜单 · 后台管理</h1><div class="sub">管理员专用 · 数据集中管理</div></div>
+  <div style="font-size:12px;opacity:.8" id="headerStatus">📡 已连接</div>
+</div>
+<div class="nav" id="nav">
+  <div class="nav-item active" data-page="dashboard" onclick="switchPage('dashboard')">📊 概况</div>
+  <div class="nav-item" data-page="recipes" onclick="switchPage('recipes')">🥩 菜单管理</div>
+  <div class="nav-item" data-page="restaurants" onclick="switchPage('restaurants')">🍜 下馆子管理</div>
+  <div class="nav-item" data-page="schedule" onclick="switchPage('schedule')">📅 排程管理</div>
+  <div class="nav-item" data-page="data" onclick="switchPage('data')">💾 数据管理</div>
+</div>
+<div class="content" id="content"></div>
+<div class="toast" id="toast"></div>
+<div class="modal-overlay" id="modal"><div class="modal-box" id="modalContent"></div></div>
+
+<script>
+const API_BASE = ''
+let currentPage = 'dashboard'
+let allData = { recipes: [], mealPlans: [], preferences: {} }
+let editingId = null
+
+async function api(method, path, body) {
+  try {
+    const opts = { method, headers: { 'Content-Type': 'application/json' } }
+    if(body) opts.body = JSON.stringify(body)
+    const res = await fetch(API_BASE + path, opts)
+    return await res.json()
+  } catch(e) { toast('网络错误: '+e.message, true); return null }
+}
+
+async function loadData() {
+  const data = await api('GET', '/api/data')
+  if(data) { allData = data; render() }
+}
+
+function toast(msg, isError) {
+  const t = document.getElementById('toast')
+  t.textContent = msg; t.className = 'toast show' + (isError?' error':'')
+  setTimeout(() => t.className = 'toast', 2000)
+}
+
+function showModal(html) {
+  document.getElementById('modalContent').innerHTML = html
+  document.getElementById('modal').classList.add('show')
+}
+function closeModal() { document.getElementById('modal').classList.remove('show') }
+
+function switchPage(page) {
+  currentPage = page
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page===page))
+  render()
+}
+
+function render() {
+  const c = document.getElementById('content')
+  if(currentPage === 'dashboard') renderDashboard(c)
+  else if(currentPage === 'recipes') renderRecipes(c)
+  else if(currentPage === 'restaurants') renderRestaurants(c)
+  else if(currentPage === 'schedule') renderSchedule(c)
+  else if(currentPage === 'data') renderData(c)
+}
+
+// ====== 概况 ======
+function renderDashboard(el) {
+  const r = allData.recipes || []
+  const p = allData.mealPlans || []
+  const today = new Date().toISOString().slice(0,10)
+  const todayPlans = p.filter(x=>x.date===today)
+  el.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-num">${r.length}</div><div class="stat-label">菜单总数</div></div>
+      <div class="stat-card"><div class="stat-num">${p.length}</div><div class="stat-label">排程总数</div></div>
+      <div class="stat-card"><div class="stat-num">${todayPlans.length}</div><div class="stat-label">今日安排</div></div>
+      <div class="stat-card"><div class="stat-num">${[...new Set(p.map(x=>x.date))].length}</div><div class="stat-label">覆盖天数</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 今日安排 (${today})</div>
+      ${todayPlans.length===0?'<div style="color:#999;font-size:13px;padding:20px 0;text-align:center">今日暂无安排</div>':
+        todayPlans.map(p=>`<div class="recipe-card">
+          <div class="rc-icon" style="background:#FFF3ED">🍳</div>
+          <div class="rc-info"><div class="rc-name">${p.recipeName}</div><div class="rc-meta">${p.mealType} · ${p.note||''}</div></div>
+          <span class="tag tag-easy">${p.mealType}</span>
+        </div>`).join('')}
+    </div>
+    <div class="card">
+      <div class="card-title">⚡ 快捷操作</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="switchPage('recipes')">🥩 管理菜单</button>
+        <button class="btn btn-success" onclick="showAddRecipe()">➕ 新增菜品</button>
+        <button class="btn btn-outline" onclick="switchPage('schedule')">📅 管理排程</button>
+      </div>
+    </div>`
+}
+
+// ====== 菜单管理 ======
+function renderRecipes(el) {
+  const r = allData.recipes || []
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title"><span>🥩 菜单列表 (${r.length})</span> <button class="btn btn-primary" onclick="showAddRecipe()">➕ 新增菜品</button></div>
+      ${r.length===0?'<div style="text-align:center;padding:30px;color:#999">暂无菜品</div>':
+        r.map(rc => {
+          const catEmoji = {'早餐':'🌅','凉菜':'🥗','热菜':'🔥','汤':'🍲','主食':'🍚','水果':'🍎','饮品':'🧃','其他':'📦'}
+          const emoji = catEmoji[rc.category]||'🍳'
+          return `<div class="recipe-card">
+            <div class="rc-icon" style="background:${CAT_COLOR[rc.category]||'#FF6B35'};color:white">${emoji}</div>
+            <div class="rc-info">
+              <div class="rc-name">${rc.name}</div>
+              <div class="rc-meta">${rc.category||''}</div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="showEditRecipe('${rc.id}')">✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteRecipe('${rc.id}')">🗑️</button>
+          </div>`
+        }).join('')}
+    </div>`
+}
+
+function showAddRecipe() { editingId = null; showRecipeForm({ id:'', name:'', category:'早餐', tips:'' }) }
+function showEditRecipe(id) { editingId = id; const r = allData.recipes.find(x=>x.id===id); if(r) showRecipeForm(JSON.parse(JSON.stringify(r))) }
+
+function showRecipeForm(rc) {
+  const cats = ['早餐','凉菜','热菜','汤','主食','水果','饮品','其他']
+  let html = `<div class="modal-title">${editingId?'编辑菜品':'新增菜品'}</div>
+    <div class="form-group"><label>菜名</label><input id="fName" value="${rc.name}" placeholder="例：鱼香肉丝"></div>
+    <div class="form-group"><label>分类</label><select id="fCat">${cats.map(c=>`<option ${c===rc.category?'selected':''}>${c}</option>`).join('')}</select></div>
+    <div class="form-group"><label>💡 备注（可选）</label><textarea id="fTips" placeholder="例如：推荐理由、口味说明等">${rc.tips||''}</textarea></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline" onclick="closeModal()" style="flex:1">取消</button>
+      <button class="btn btn-primary" onclick="saveRecipe()" style="flex:1">${editingId?'保存修改':'添加菜品'}</button>
+    </div>`
+  showModal(html)
+}
+
+function addIngRow() {}
+function addStepRow() {}
+
+async function saveRecipe() {
+  const name = document.getElementById('fName')?.value?.trim()
+  if(!name) return toast('请输入菜名', true)
+
+  const recipe = {
+    id: editingId || 'r_'+Date.now(),
+    name,
+    category: document.getElementById('fCat')?.value || '早餐',
+    tips: document.getElementById('fTips')?.value?.trim() || ''
+  }
+
+  const res = await api('POST', '/api/recipes', recipe)
+  if(res?.success) { toast('保存成功'); closeModal(); await loadData() }
+}
+
+async function deleteRecipe(id) {
+  if(!confirm('确定要删除这个菜品吗？')) return
+  const res = await api('DELETE', '/api/recipes/'+id)
+  if(res?.success) { toast('已删除'); await loadData() }
+}
+
+// ====== 下馆子管理 ======
+let editingRestId = null
+
+function renderRestaurants(el) {
+  const r = allData.restaurants || []
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title"><span>🍜 饭店列表 (${r.length})</span> <button class="btn btn-primary" onclick="showAddRestaurant()">➕ 新增饭店</button></div>
+      ${r.length===0?'<div style="text-align:center;padding:30px;color:#999">暂无饭店</div>':
+        r.map(rc => {
+          return `<div class="recipe-card">
+            <div class="rc-icon" style="background:#FF6B35;color:white">🏪</div>
+            <div class="rc-info">
+              <div class="rc-name">${rc.name}</div>
+              <div class="rc-meta">${rc.category||''}${rc.tips?' · '+rc.tips:''}</div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="showEditRestaurant('${rc.id}')">✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteRestaurant('${rc.id}')">🗑️</button>
+          </div>`
+        }).join('')}
+    </div>`
+}
+
+function showAddRestaurant() { editingRestId = null; showRestaurantForm({ id:'', name:'', category:'其他', tips:'' }) }
+function showEditRestaurant(id) { editingRestId = id; const r = (allData.restaurants||[]).find(x=>x.id===id); if(r) showRestaurantForm(JSON.parse(JSON.stringify(r))) }
+
+function showRestaurantForm(rc) {
+  const cats = ['早餐','凉菜','热菜','汤','主食','水果','饮品','其他']
+  let html = `<div class="modal-title">${editingRestId?'编辑饭店':'新增饭店'}</div>
+    <div class="form-group"><label>店名</label><input id="rfName" value="${rc.name}" placeholder="例：老北京炸酱面"></div>
+    <div class="form-group"><label>主打品类</label><select id="rfCat">${cats.map(c=>`<option ${c===rc.category?'selected':''}>${c}</option>`).join('')}</select></div>
+    <div class="form-group"><label>💡 备注（可选）</label><textarea id="rfTips" placeholder="例如：推荐菜、口味评价等">${rc.tips||''}</textarea></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline" onclick="closeModal()" style="flex:1">取消</button>
+      <button class="btn btn-primary" onclick="saveRestaurant()" style="flex:1">${editingRestId?'保存修改':'添加饭店'}</button>
+    </div>`
+  showModal(html)
+}
+
+async function saveRestaurant() {
+  const name = document.getElementById('rfName')?.value?.trim()
+  if(!name) return toast('请输入店名', true)
+  const restaurant = {
+    id: editingRestId || 'rest_'+Date.now(),
+    name,
+    category: document.getElementById('rfCat')?.value || '其他',
+    tips: document.getElementById('rfTips')?.value?.trim() || ''
+  }
+  let restaurants = allData.restaurants || []
+  if(editingRestId) restaurants = restaurants.map(r=>r.id===editingRestId?restaurant:r)
+  else restaurants.push(restaurant)
+  allData.restaurants = restaurants
+  const res = await api('POST', '/api/data', allData)
+  if(res?.success) { toast('保存成功'); closeModal(); await loadData() }
+}
+
+async function deleteRestaurant(id) {
+  if(!confirm('确定要删除这个饭店吗？')) return
+  allData.restaurants = (allData.restaurants||[]).filter(r=>r.id!==id)
+  const res = await api('POST', '/api/data', allData)
+  if(res?.success) { toast('已删除'); await loadData() }
+}
+
+// ====== 排程管理 ======
+function renderSchedule(el) {
+  const plans = allData.mealPlans || []
+  const dates = [...new Set(plans.map(p=>p.date))].sort()
+
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title">📅 所有排程 (${plans.length})</div>
+      ${dates.length===0?'<div style="text-align:center;padding:30px;color:#999">暂无排程</div>':
+        dates.map(d => {
+          const dayPlans = plans.filter(p=>p.date===d)
+          return `<div style="margin-bottom:12px">
+            <div style="font-size:14px;font-weight:600;color:#333;margin-bottom:8px">📅 ${d}</div>
+            ${['早餐','午餐','晚餐','加餐'].map(mt => {
+              const p = dayPlans.find(x=>x.mealType===mt)
+              return p?`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#F8F8F8;border-radius:8px;margin-bottom:4px">
+                <span class="tag tag-easy">${mt}</span>
+                <span style="flex:1;font-size:13px;color:#333">${p.recipeName}</span>
+                <span style="font-size:11px;color:#999">${p.note||''}</span>
+                <span onclick="deletePlanItem('${d}','${mt}')" style="color:#FF4757;cursor:pointer;font-size:14px">✕</span>
+              </div>`:''
+            }).join('')}
+          </div>`
+        }).join('')}
+    </div>`
+}
+
+async function deletePlanItem(date, mealType) {
+  let plans = allData.mealPlans || []
+  plans = plans.filter(p => !(p.date===date && p.mealType===mealType))
+  const res = await api('POST', '/api/plans', plans)
+  if(res?.success) { toast('已删除'); await loadData() }
+}
+
+// ====== 数据管理 ======
+function renderData(el) {
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title">💾 数据备份与恢复</div>
+      <div style="margin-bottom:16px;font-size:13px;color:#666;line-height:1.8">
+        当前数据：${(allData.recipes||[]).length} 个菜品，${(allData.mealPlans||[]).length} 条排程
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="exportData()">📤 导出备份</button>
+        <button class="btn btn-success" onclick="document.getElementById('importFile').click()">📥 导入备份</button>
+        <button class="btn btn-outline" onclick="resetData()">🔄 恢复默认示例</button>
+      </div>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    </div>
+    <div class="card">
+      <div class="card-title">📡 系统信息</div>
+      <div style="font-size:13px;color:#666;line-height:2">
+        <div>用户访问地址：<span style="color:#FF6B35">${window.location.origin}/index.html</span></div>
+        <div>管理后台地址：<span style="color:#FF6B35">${window.location.href}</span></div>
+        <div>数据存储方式：服务器 JSON 文件</div>
+      </div>
+    </div>`
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(allData, null, 2)], {type:'application/json'})
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = `家庭菜谱备份_${new Date().toISOString().slice(0,10)}.json`
+  a.click()
+  toast('已导出')
+}
+
+async function importData(e) {
+  const file = e.target.files[0]; if(!file) return
+  try {
+    const text = await file.text()
+    const data = JSON.parse(text)
+    const res = await api('POST', '/api/data', data)
+    if(res?.success) { toast('已导入'); await loadData() }
+  } catch(err) { toast('文件格式错误', true) }
+  e.target.value = ''
+}
+
+async function resetData() {
+  if(!confirm('确定要恢复默认示例数据吗？现有数据将被覆盖！')) return
+  const defaultData = {"recipes":[{"id":"r1","name":"鱼香肉丝","category":"家常菜","difficulty":"简单","prepTime":15,"cookTime":20,"ingredients":[{"name":"猪肉","amount":"200g"},{"name":"木耳","amount":"50g"},{"name":"胡萝卜","amount":"1根"},{"name":"青椒","amount":"1个"}],"steps":[{"content":"猪肉切丝，加料酒腌制"},{"content":"木耳泡发切丝"},{"content":"热锅凉油，下肉丝翻炒"},{"content":"加配菜翻炒，倒入鱼香汁收汁"}],"tips":"肉丝逆着纹理切更嫩"}]}
+  const res = await api('POST', '/api/data', defaultData)
+  if(res?.success) { toast('已恢复'); await loadData() }
+}
+
+// ====== 颜色映射 ======
+const CAT_COLOR = {'早餐':'#FFA502','凉菜':'#2ED573','热菜':'#E74C3C','汤':'#3498DB','主食':'#F39C12','水果':'#FF6B6B','饮品':'#1ABC9C','其他':'#95A5A6'}
+
+// ====== 初始化 ======
+loadData()
+</script>
+</body>
+</html>
