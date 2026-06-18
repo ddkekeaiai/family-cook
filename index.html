@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>家庭菜谱</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F5F5F5;height:100vh;display:flex;flex-direction:column;color:#333}
+#app{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;width:100%}
+.header{background:linear-gradient(135deg,#FF6B35,#FF8F47);color:white;text-align:center;padding:12px 16px;flex-shrink:0}
+.header h1{font-size:18px;font-weight:600}
+.header p{font-size:11px;opacity:.8;margin-top:1px}
+.content{flex:1;overflow:hidden;padding:0;position:relative}
+.tab-bar{display:flex;background:white;border-top:1px solid #E8E8E8;flex-shrink:0;padding:4px 0;padding-bottom:max(4px,env(safe-area-inset-bottom))}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:#999;gap:2px;padding:4px 0;cursor:pointer;position:relative}
+.tab-item.active{color:#FF6B35}
+.tab-icon{font-size:20px}
+.tab-badge{position:absolute;top:0;right:50%;transform:translateX(18px);background:#FF4757;color:white;font-size:9px;padding:1px 5px;border-radius:8px;min-width:16px;text-align:center;font-weight:600}
+.tab-page{display:none;position:absolute;top:0;left:0;right:0;bottom:0}
+.tab-page.active{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* 左右分栏 */
+.menu-layout{display:flex;height:100%}
+.menu-side{width:85px;background:white;flex-shrink:0;overflow-y:auto;box-shadow:1px 0 6px rgba(0,0,0,.04);padding:4px 0;-webkit-overflow-scrolling:touch}
+.menu-side-item{display:flex;flex-direction:column;align-items:center;padding:12px 4px;cursor:pointer;position:relative;transition:.15s;user-select:none;-webkit-tap-highlight-color:transparent}
+.menu-side-item:active{background:#FFF8F5}
+.menu-side-item.active{background:#FFF3ED}
+.menu-side-item.active .msi-name{color:#FF6B35;font-weight:600}
+.msi-indicator{position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:28px;background:#FF6B35;border-radius:0 3px 3px 0}
+.msi-emoji{font-size:18px;margin-bottom:3px}
+.msi-name{font-size:10px;color:#666}
+.msi-count{font-size:8px;color:#bbb;background:#F0F0F0;padding:0 6px;border-radius:6px;margin-top:2px}
+.menu-side-item.active .msi-count{background:#FFE4D6;color:#FF6B35}
+
+.menu-main{flex:1;overflow-y:auto;padding:10px 12px 80px;-webkit-overflow-scrolling:touch}
+.menu-main-title{font-size:15px;font-weight:700;margin-bottom:10px}
+.menu-main-title span{font-size:11px;font-weight:400;margin-left:6px}
+.recipe-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.rcard{background:white;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04);cursor:pointer;transition:.15s}
+.rcard:active{transform:scale(.95)}
+.rcard-img{height:60px;display:flex;align-items:center;justify-content:center;font-size:20px;position:relative}
+.rcard-add{position:absolute;bottom:4px;right:4px;width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:12px;color:#FF6B35;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.rcard-name{font-size:12px;color:#333;font-weight:500;text-align:center;padding:8px 4px}
+
+/* 今日安排横幅 */
+.today-banner{background:white;border-radius:10px;margin-bottom:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.today-banner-hd{display:flex;align-items:center;padding:8px 12px;background:#FFF8F5;font-size:12px;font-weight:600;color:#FF6B35;gap:6px;border-bottom:1px solid #FFF0E8}
+.today-meals{padding:8px 12px}
+.today-meal{display:flex;align-items:center;padding:6px 0;font-size:12px;gap:8px}
+.today-meal .mt{width:36px;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;color:white;text-align:center;flex-shrink:0}
+.today-meal .mt.m1{background:#FFA502}
+.today-meal .mt.m2{background:#FF6B35}
+.today-meal .mt.m3{background:#E74C3C}
+.today-meal .mt.m4{background:#9B59B6}
+.today-meal .mn{color:#333;flex:1}
+.today-meal .me{color:#ddd;flex:1}
+.today-empty{text-align:center;padding:12px;color:#ccc;font-size:11px}
+
+/* 购物车 */
+.cart-page{padding:12px 14px 100px}
+.cart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.cart-title{font-size:15px;font-weight:600;color:#333}
+.cart-clear{font-size:12px;color:#FF4757;cursor:pointer;padding:4px}
+.cart-empty{text-align:center;padding:60px 20px;color:#ccc;font-size:13px;line-height:1.8}
+.cart-item{display:flex;align-items:center;background:white;border-radius:10px;padding:12px;margin-bottom:8px;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.cart-item-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.cart-item-info{flex:1}
+.cart-item-name{font-size:13px;color:#333;font-weight:500}
+.cart-item-cat{font-size:10px;color:#999;margin-top:2px}
+.cart-item-del{font-size:16px;color:#ccc;cursor:pointer;padding:4px}
+.cart-item-del:active{color:#FF4757}
+
+/* 下单操作栏 */
+.cart-actions{position:fixed;bottom:56px;left:0;right:0;max-width:480px;margin:0 auto;padding:8px 14px;background:linear-gradient(transparent,#F5F5F5 20%);z-index:5}
+.cart-order-bar{background:rgba(0,0,0,.85);border-radius:24px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(10px)}
+.cart-order-info{color:white;font-size:14px;font-weight:500}
+.cart-order-info small{font-size:11px;font-weight:400;opacity:.7;margin-left:6px}
+.cart-order-btn{background:linear-gradient(135deg,#FF6B35,#FF8F47);border:none;border-radius:18px;padding:10px 20px;color:white;font-size:13px;font-weight:600;cursor:pointer}
+.cart-order-btn:active{opacity:.85}
+.cart-order-btn:disabled{opacity:.4}
+
+.no-data{text-align:center;padding:40px 20px;color:#ccc;font-size:13px;line-height:1.8}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <h1>🍳 家庭菜谱</h1>
+    <p id="headerDate"></p>
+  </div>
+  <div class="content" id="pageContent"></div>
+  <div class="tab-bar">
+    <div class="tab-item active" data-tab="menu" onclick="switchTab('menu')">
+      <span class="tab-icon">🥘</span><span style="font-size:9px;line-height:1.3;text-align:center">午窗一钵青精饭<br>拣得香薪手自炊</span>
+    </div>
+    <div class="tab-item" data-tab="eatout" onclick="switchTab('eatout')">
+      <span class="tab-icon">🍜</span><span style="font-size:8px;line-height:1.15;text-align:center">今日不举炊<br>且下馆子去</span>
+    </div>
+    <div class="tab-item" data-tab="cart" onclick="switchTab('cart')">
+      <span class="tab-icon">🧺</span><span>已选菜品</span>
+      <span class="tab-badge" id="cartBadge" style="display:none">0</span>
+    </div>
+    <div class="tab-item" data-tab="pick" onclick="switchTab('pick')">
+      <span class="tab-icon">🎲</span><span>吃什么</span>
+    </div>
+    <div class="tab-item" data-tab="week" onclick="switchTab('week')">
+      <span class="tab-icon">📅</span><span>排餐表</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = ''
+let allData = { recipes:[], mealPlans:[], preferences:{} }
+let currentTab = 'menu'
+let selDate = ''
+let cart = [] // { id, name, category }
+
+async function fetchData() {
+  try { const r=await fetch('/api/data'); if(r.ok) allData=await r.json() } catch(e) {}
+}
+
+function fmtDate(d) {
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0')
+  return `${y}-${m}-${dd}`
+}
+function todayStr() { return fmtDate(new Date()) }
+
+function weekDates() {
+  const n=new Date(),dow=n.getDay(),mon=new Date(n)
+  mon.setDate(n.getDate()+(dow===0?-6:1-dow))
+  return Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return fmtDate(d)})
+}
+
+const CAT_EMOJI={'早餐':'🌅','凉菜':'🥗','热菜':'🔥','汤':'🍲','主食':'🍚','水果':'🍎','饮品':'🧃','其他':'📦'}
+const CAT_COLOR={'早餐':'#FFA502','凉菜':'#2ED573','热菜':'#E74C3C','汤':'#3498DB','主食':'#F39C12','水果':'#FF6B6B','饮品':'#1ABC9C','其他':'#95A5A6'}
+const CAT_ORDER = ['早餐','凉菜','热菜','汤','主食','水果','饮品','其他']
+const WD=['日','一','二','三','四','五','六']
+
+function updateCartBadge() {
+  const b = document.getElementById('cartBadge')
+  if(cart.length > 0) { b.style.display='block'; b.textContent=cart.length }
+  else b.style.display='none'
+}
+
+function switchTab(tab) {
+  currentTab = tab
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab))
+  render()
+}
+
+function render() {
+  document.getElementById('headerDate').textContent = todayStr()
+  const c = document.getElementById('pageContent')
+  let html = ''
+  if(currentTab === 'menu') html = renderMenu()
+  else if(currentTab === 'cart') html = renderCart()
+  else if(currentTab === 'eatout') html = renderEatout()
+  else if(currentTab === 'pick') html = renderPick()
+  else if(currentTab === 'week') html = renderWeek()
+  c.innerHTML = `<div class="tab-page active">${html}</div>`
+  updateCartBadge()
+}
+
+// ==================== 今日菜单 ====================
+let menuCat = ''
+
+function renderMenu() {
+  const recipes = allData.recipes||[]
+  const cats = [...new Set(recipes.map(r=>r.category).filter(Boolean))].sort((a,b)=>CAT_ORDER.indexOf(a)-CAT_ORDER.indexOf(b))
+  if(!menuCat) menuCat = cats[0]||''
+
+  let side = `<div class="menu-side">`
+  cats.forEach(c => {
+    const isAct = c===menuCat, count = recipes.filter(r=>r.category===c).length
+    side += `<div class="menu-side-item ${isAct?'active':''}" onclick="menuCat='${c}';render()">
+      ${isAct?'<div class="msi-indicator"></div>':''}
+      <span class="msi-emoji">${CAT_EMOJI[c]||'📦'}</span>
+      <span class="msi-name">${c}</span>
+      <span class="msi-count">${count}</span>
+    </div>`
+  })
+  side += `</div>`
+
+  const filtered = recipes.filter(r=>r.category===menuCat)
+  let main = `<div class="menu-main"><div class="menu-main-title" style="color:${CAT_COLOR[menuCat]||'#FF6B35'}">${CAT_EMOJI[menuCat]||'📦'} ${menuCat}<span>${filtered.length}道</span></div>
+    <div class="recipe-grid">`
+  filtered.forEach(r => {
+    main += `<div class="rcard" onclick="addToCart('${r.id}','${r.name}','${r.category}')">
+      <div class="rcard-img" style="background:${CAT_COLOR[menuCat]||'#FF6B35'}">
+        ${CAT_EMOJI[r.category]||'🍳'}
+        <span class="rcard-add">+</span>
+      </div>
+      <div class="rcard-name">${r.name}</div>
+    </div>`
+  })
+  main += `</div></div>`
+  return `<div class="menu-layout">${side}${main}</div>`
+}
+
+function addToCart(id, name, cat) {
+  if(cart.find(c=>c.id===id)) { toast('已在购物车中'); return }
+  cart.push({ id, name, category: cat })
+  updateCartBadge()
+  toast(`已加入「${name}」`)
+}
+
+function toast(msg) {
+  const t = document.createElement('div')
+  t.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.75);color:white;padding:10px 20px;border-radius:10px;font-size:13px;z-index:200;pointer-events:none;animation:fadeInOut 1.5s ease'
+  t.textContent = msg
+  document.body.appendChild(t)
+  setTimeout(() => t.remove(), 1500)
+}
+
+// ==================== 下馆子（同分类布局） ====================
+let eatoutCat = ''
+
+function renderEatout() {
+  const restaurants = allData.restaurants||[]
+  const cats = [...new Set(restaurants.map(r=>r.category).filter(Boolean))].sort((a,b)=>CAT_ORDER.indexOf(a)-CAT_ORDER.indexOf(b))
+  if(!eatoutCat) eatoutCat = cats[0]||''
+
+  let side = `<div class="menu-side">`
+  cats.forEach(c => {
+    const isAct = c===eatoutCat, count = restaurants.filter(r=>r.category===c).length
+    side += `<div class="menu-side-item ${isAct?'active':''}" onclick="eatoutCat='${c}';render()">
+      ${isAct?'<div class="msi-indicator"></div>':''}
+      <span class="msi-emoji">${CAT_EMOJI[c]||'📦'}</span>
+      <span class="msi-name">${c}</span>
+      <span class="msi-count">${count}</span>
+    </div>`
+  })
+  side += `</div>`
+
+  const filtered = restaurants.filter(r=>r.category===eatoutCat)
+  let main = `<div class="menu-main"><div class="menu-main-title" style="color:${CAT_COLOR[eatoutCat]||'#FF6B35'}">🍜 下馆子 — ${CAT_EMOJI[eatoutCat]||'📦'} ${eatoutCat}<span>${filtered.length}家</span></div>
+    <div class="recipe-grid">`
+  filtered.forEach(r => {
+    main += `<div class="rcard" onclick="addToCart('${r.id}','${r.name}','${r.category}')">
+      <div class="rcard-img" style="background:#FF6B35">
+        🏪
+        <span class="rcard-add">+</span>
+      </div>
+      <div class="rcard-name">${r.name}</div>
+    </div>`
+  })
+  main += `</div></div>`
+  return `<div class="menu-layout">${side}${main}</div>`
+}
+
+// ==================== 购物车 ====================
+function renderCart() {
+  if(cart.length === 0) return `<div class="cart-page"><div class="cart-empty"><div style="font-size:48px;margin-bottom:8px;opacity:.4">🛒</div>购物车是空的<br>去「今日菜单」点菜吧</div></div>`
+
+  let html = `<div class="cart-page">
+    <div class="cart-header"><span class="cart-title">🛒 购物车 (${cart.length})</span><span class="cart-clear" onclick="clearCart()">清空</span></div>`
+  cart.forEach((item,i) => {
+    html += `<div class="cart-item">
+      <div class="cart-item-icon" style="background:${CAT_COLOR[item.category]||'#FF6B35'}">${CAT_EMOJI[item.category]||'🍳'}</div>
+      <div class="cart-item-info"><div class="cart-item-name">${item.name}</div><div class="cart-item-cat">${item.category||''}</div></div>
+      <span class="cart-item-del" onclick="removeFromCart(${i})">✕</span>
+    </div>`
+  })
+  html += `</div>
+  <div class="cart-actions">
+    <div class="cart-order-bar">
+      <span class="cart-order-info">${cart.length} 道菜 <small>${todayStr()}</small></span>
+      <button class="cart-order-btn" onclick="placeOrder()">📥 下单</button>
+    </div>
+  </div>`
+  return html
+}
+
+function clearCart() { cart = []; render() }
+function removeFromCart(i) { cart.splice(i,1); render() }
+
+async function placeOrder() {
+  if(cart.length===0) return
+  const date = todayStr()
+  let plans = allData.mealPlans || []
+
+  // 不清除已有排程，只追加新点的菜到晚餐
+  cart.forEach(item => {
+    plans.push({ date, mealType:'晚餐', recipeId:item.id, recipeName:item.name, note:'', time:Date.now() })
+  })
+
+  allData.mealPlans = plans
+  try {
+    await fetch('/api/data', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ recipes:allData.recipes, mealPlans:plans, preferences:allData.preferences||{} })
+    })
+    const count = cart.length
+    cart = []
+    toast(`✅ 已下单！${count} 道菜已排入 ${date} 晚餐`)
+    switchTab('week')
+  } catch(e) { toast('下单失败，请重试') }
+}
+
+// ==================== 吃什么（随机推荐） ====================
+function renderPick() {
+  return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:30px 24px">
+    <div id="pw" style="width:160px;height:160px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:24px;position:relative;transition:transform 1.5s cubic-bezier(.17,.67,.12,.99);box-shadow:0 6px 24px rgba(255,107,53,.3);background:conic-gradient(#FF6B35 0% 25%,#FF8F47 25% 50%,#FFA07A 50% 75%,#FFB347 75% 100%)">
+      <div style="position:absolute;top:-8px;font-size:16px;color:#FF6B35">▼</div>
+      <div style="width:80px;height:80px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:inset 0 2px 8px rgba(0,0,0,.1)">🍳</div>
+    </div>
+    <button id="pickBtn" onclick="doPick()" style="background:linear-gradient(135deg,#FF6B35,#FF8F47);color:white;border:none;border-radius:24px;padding:14px 48px;font-size:17px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(255,107,53,.4);letter-spacing:2px;margin-bottom:20px">✨ 吃什么</button>
+    <div id="pickResult" style="width:100%;max-width:320px"></div>
+  </div>`
+}
+
+let picking = false
+function doPick() {
+  const recipes = allData.recipes||[]
+  if(recipes.length===0||picking) return
+  picking = true
+  const btn = document.getElementById('pickBtn')
+  const pw = document.getElementById('pw')
+  btn.disabled = true; btn.textContent = '🤔 想想...'
+  pw.style.transform = `rotate(${720+Math.floor(Math.random()*360)}deg)`
+  setTimeout(() => {
+    const picked = recipes[Math.floor(Math.random()*recipes.length)]
+    document.getElementById('pickResult').innerHTML = `
+      <div style="border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);animation:slideUp .4s ease-out">
+        <div style="height:140px;background:${CAT_COLOR[picked.category]||'#FF6B35'};display:flex;align-items:center;justify-content:center;font-size:44px">${CAT_EMOJI[picked.category]||'🍳'}</div>
+        <div style="background:white;padding:14px 16px;border-radius:0 0 12px 12px">
+          <div style="font-size:19px;font-weight:700;color:#2D3436">${picked.name}</div>
+          <div style="font-size:12px;color:#999;line-height:1.6;margin-bottom:6px">${picked.category||''}</div>
+          ${picked.tips?`<div style="font-size:11px;color:#FF6B35;margin-bottom:10px">💡 ${picked.tips}</div>`:''}
+          <div onclick="addToCart('${picked.id}','${picked.name}','${picked.category}')" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;background:linear-gradient(135deg,#FF6B35,#FF8F47);color:white;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer">🛒 加至已选</div>
+        </div>
+      </div>`
+    picking = false; btn.disabled = false; btn.textContent = '✨ 再换一个'
+  }, 1500)
+}
+
+// ==================== 排餐表 ====================
+function renderWeek() {
+  const dates = weekDates(); selDate = selDate || todayStr()
+  const plans = allData.mealPlans||[]
+
+  let html = `<div style="display:flex;gap:6px;padding:12px 14px 10px;overflow-x:auto">`
+  dates.forEach(d => {
+    const it=d===todayStr(), is=d===selDate, dp=plans.filter(p=>p.date===d)
+    html += `<div onclick="selDate='${d}';render()" style="display:flex;flex-direction:column;align-items:center;padding:8px 10px;border-radius:8px;background:${is?'linear-gradient(135deg,#FF6B35,#FF8F47)':'white'};border:${it&&!is?'2px solid #FF6B35':'none'};flex-shrink:0;min-width:48px;cursor:pointer">
+      <span style="font-size:10px;color:${is?'rgba(255,255,255,.8)':'#999'}">${WD[(new Date(d)).getDay()]}</span>
+      <span style="font-size:14px;font-weight:600;color:${is?'white':'#333'}">${d.slice(5)}</span>
+      ${dp.length>0?`<span style="font-size:8px;color:${is?'rgba(255,255,255,.8)':'#2ED573'};margin-top:1px">●</span>`:''}</div>`
+  })
+  html += `</div>`
+
+  const dp = plans.filter(p=>p.date===selDate)
+  const mts = ['早餐','午餐','晚餐','加餐']; const cls={'早餐':'m1','午餐':'m2','晚餐':'m3','加餐':'m4'}
+
+  html += `<div style="margin:0 14px 40px"><div class="today-banner"><div class="today-banner-hd">📅 ${selDate} <span style="font-size:11px;font-weight:400;color:#999;margin-left:8px">点击菜品可调整餐型</span></div><div class="today-meals">`
+  mts.forEach(mt => {
+    const items = dp.filter(x=>x.mealType===mt)
+    html += `<div style="margin-bottom:4px">`
+    if(items.length > 0) {
+      items.forEach((item, idx) => {
+        html += `<div class="today-meal" style="cursor:pointer" onclick="showMealTypeMenu('${item.recipeId}','${mt}','${selDate}')">
+          <span class="mt ${cls[mt]}">${mt}</span>
+          <span class="mn">${item.recipeName}</span>
+          <span style="font-size:11px;color:#ccc;margin-left:auto">✎</span>
+        </div>`
+      })
+    } else {
+      html += `<div class="today-meal" style="opacity:.4"><span class="mt ${cls[mt]}" style="background:#E8E8E8;color:#ccc">${mt}</span><span class="me">未安排</span></div>`
+    }
+    html += `</div>`
+  })
+  html += `</div></div></div>`
+  return html
+}
+
+function showMealTypeMenu(recipeId, currentMt, date) {
+  const plans = allData.mealPlans||[]
+  const item = plans.find(p=>p.recipeId===recipeId && p.date===date && p.mealType===currentMt)
+  if(!item) return
+  const mts = ['早餐','午餐','晚餐','加餐']; const cls={'早餐':'m1','午餐':'m2','晚餐':'m3','加餐':'m4'}
+  let html = `<div style="text-align:center;padding:4px 0 8px">
+    <div style="font-size:16px;font-weight:600;margin-bottom:12px">✏️ ${item.recipeName}</div>
+    <div style="font-size:13px;color:#999;margin-bottom:10px">当前：<span class="mt ${cls[currentMt]}" style="padding:2px 10px;border-radius:4px;font-size:11px;color:white">${currentMt}</span></div>
+    <div style="font-size:13px;color:#666;margin-bottom:10px">调整到：</div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:14px">`
+  mts.forEach(mt => {
+    html += `<span onclick="changeMealType('${recipeId}','${currentMt}','${mt}','${date}')" style="padding:8px 16px;border-radius:8px;background:${mt===currentMt?'#FF6B35':'#F0F0F0'};color:${mt===currentMt?'white':'#666'};font-size:13px;cursor:pointer;font-weight:${mt===currentMt?'600':'400'}">${mt}</span>`
+  })
+  html += `</div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <span onclick="deleteMealItem('${recipeId}','${currentMt}','${date}')" style="flex:1;padding:10px;background:#FF4757;color:white;border-radius:8px;cursor:pointer;font-size:13px">🗑️ 删除</span>
+      <span onclick="closeModal()" style="flex:1;padding:10px;background:#F0F0F0;color:#666;border-radius:8px;cursor:pointer;font-size:13px">取消</span>
+    </div>
+  </div>`
+  showModal(html)
+}
+
+async function changeMealType(recipeId, oldMt, newMt, date) {
+  if(oldMt === newMt) { closeModal(); return }
+  let plans = allData.mealPlans||[]
+  const idx = plans.findIndex(p=>p.recipeId===recipeId && p.date===date && p.mealType===oldMt)
+  if(idx === -1) { closeModal(); return }
+  plans[idx].mealType = newMt
+  allData.mealPlans = plans
+  try {
+    await fetch('/api/data', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ recipes:allData.recipes, mealPlans:plans, preferences:allData.preferences||{} }) })
+    toast(`已改为「${newMt}」`)
+  } catch(e) {}
+  closeModal()
+  render()
+}
+
+async function deleteMealItem(recipeId, mt, date) {
+  let plans = allData.mealPlans||[]
+  const idx = plans.findIndex(p=>p.recipeId===recipeId && p.date===date && p.mealType===mt)
+  if(idx === -1) { closeModal(); return }
+  const name = plans[idx].recipeName
+  plans.splice(idx, 1)
+  allData.mealPlans = plans
+  try {
+    await fetch('/api/data', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ recipes:allData.recipes, mealPlans:plans, preferences:allData.preferences||{} }) })
+    toast(`已删除「${name}」`)
+  } catch(e) {}
+  closeModal()
+  render()
+}
+
+function showModal(html) {
+  const overlay = document.createElement('div')
+  overlay.id = 'modalOverlay'
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:100;display:flex;align-items:center;justify-content:center'
+  const box = document.createElement('div')
+  box.style.cssText = 'background:white;border-radius:16px;padding:20px;width:85%;max-width:340px;animation:fadeIn .2s'
+  box.innerHTML = html
+  overlay.appendChild(box)
+  overlay.onclick = function(e) { if(e.target===overlay) closeModal() }
+  document.body.appendChild(overlay)
+}
+
+function closeModal() {
+  const el = document.getElementById('modalOverlay')
+  if(el) el.remove()
+}
+
+// ==================== 启动 ====================
+// 添加 toast 动画
+const style = document.createElement('style')
+style.textContent = '@keyframes fadeInOut{0%{opacity:0}15%{opacity:1}85%{opacity:1}100%{opacity:0}}@keyframes fadeIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}'
+document.head.appendChild(style)
+
+fetchData().then(() => render())
+document.getElementById('headerDate').textContent = todayStr()
+</script>
+</body>
+</html>
