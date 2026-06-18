@@ -2,7 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const app = express();
-const PORT = 57525;
+const PORT = process.env.PORT || 57525;
 const DATA_FILE = path.join(__dirname, 'data.json');
 
 app.use(express.json());
