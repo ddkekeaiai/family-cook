@@ -9,33 +9,44 @@
 body{display:flex;justify-content:center;align-items:center;min-height:100vh;background:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:20px}
 .card{background:white;border-radius:20px;padding:30px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.1);max-width:420px;width:100%}
 h1{font-size:22px;color:#FF6B35;margin-bottom:4px}
-.sub{font-size:13px;color:#999;margin-bottom:20px}
-.qrcode{width:200px;height:200px;margin:0 auto 16px;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.sub{font-size:13px;color:#999;margin-bottom:12px}
+.qrcode{width:200px;height:200px;margin:0 auto 12px;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.08)}
 .qrcode img{width:100%;height:100%;display:block}
-.urls{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
-.url-btn{display:block;padding:14px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none}
-.url-btn.user{background:linear-gradient(135deg,#FF6B35,#FF8F47);color:white;box-shadow:0 4px 12px rgba(255,107,53,.3)}
+.login-url{font-size:11px;color:#ccc;word-break:break-all;margin-bottom:12px;padding:6px 10px;background:#F8F8F8;border-radius:6px}
+.urls{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.url-btn{display:block;padding:12px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none}
+.url-btn.entry{background:linear-gradient(135deg,#FF6B35,#FF8F47);color:white;box-shadow:0 4px 12px rgba(255,107,53,.3)}
 .url-btn.admin{background:white;color:#FF6B35;border:2px solid #FF6B35}
-.desc{font-size:12px;color:#999;line-height:1.8;text-align:left;margin-top:16px;padding:12px;background:#F8F8F8;border-radius:8px}
+.desc{font-size:12px;color:#999;line-height:1.8;text-align:left;margin-top:12px;padding:12px;background:#F8F8F8;border-radius:8px}
 .desc strong{color:#FF6B35}
 </style>
 </head>
 <body>
 <div class="card">
   <h1>🍳 家庭菜谱</h1>
-  <p class="sub">请选择您的入口</p>
+  <p class="sub">扫码打开，首次输密码，之后自动登录</p>
   <div class="qrcode">
-    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://18f6419e997981b8-111-21-2-221.serveousercontent.com/" alt="二维码">
+    <img id="qrImg" alt="加载二维码中...">
   </div>
+  <div class="login-url" id="loginUrl"></div>
   <div class="urls">
-    <a href="https://18f6419e997981b8-111-21-2-221.serveousercontent.com/" class="url-btn user">📱 用户端 · 扫码查看</a>
-    <a href="https://18f6419e997981b8-111-21-2-221.serveousercontent.com/admin.html" class="url-btn admin">⚙️ 管理端 · Web后台</a>
+    <a id="entryLink" class="url-btn entry">📱 打开登录页</a>
+    <a id="adminLink" class="url-btn admin">⚙️ 管理后台</a>
   </div>
   <div class="desc">
-    用户端：查看今日菜单、菜品浏览、本周排餐<br>
-    管理端：菜谱管理、排程设置、数据维护<br><br>
-    <strong>用户端仅可查看，所有管理操作请在管理端进行</strong>
+    首次使用请选择身份 → 输入密码<br>
+    之后再次扫码会 <strong>自动登录</strong>，无需重复输密码<br><br>
+    默认密码：<strong>admin123</strong>
   </div>
 </div>
+
+<script>
+// 动态生成二维码，以当前服务地址为准
+const baseUrl = window.location.origin + '/login.html'
+document.getElementById('qrImg').src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(baseUrl)
+document.getElementById('loginUrl').textContent = baseUrl
+document.getElementById('entryLink').href = baseUrl
+document.getElementById('adminLink').href = window.location.origin + '/admin.html'
+</script>
 </body>
 </html>

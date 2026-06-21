@@ -1,4 +1,7 @@
 node_modules/
 .env
 *.log
+.secret
+ip.txt
+qr-test.html
 data.json

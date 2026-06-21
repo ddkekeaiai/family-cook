@@ -87,7 +87,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div id="app">
   <div class="header">
     <h1>🍳 家庭菜谱</h1>
-    <p id="headerDate"></p>
+    <div style="display:flex;align-items:center;gap:12px">
+      <p id="headerDate" style="margin:0;font-size:11px;opacity:.8"></p>
+      <span onclick="logout()" style="font-size:11px;opacity:.7;cursor:pointer;padding:4px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.3);white-space:nowrap">退出</span>
+    </div>
   </div>
   <div class="content" id="pageContent"></div>
   <div class="tab-bar">
@@ -95,7 +98,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <span class="tab-icon">🥘</span><span style="font-size:9px;line-height:1.3;text-align:center">午窗一钵青精饭<br>拣得香薪手自炊</span>
     </div>
     <div class="tab-item" data-tab="eatout" onclick="switchTab('eatout')">
-      <span class="tab-icon">🍜</span><span style="font-size:8px;line-height:1.15;text-align:center">今日不举炊<br>且下馆子去</span>
+      <span class="tab-icon">🍜</span><span style="font-size:9px;line-height:1.3;text-align:center">今日不举炊<br>且下馆子去</span>
     </div>
     <div class="tab-item" data-tab="cart" onclick="switchTab('cart')">
       <span class="tab-icon">🧺</span><span>已选菜品</span>
@@ -116,6 +119,28 @@ let allData = { recipes:[], mealPlans:[], preferences:{} }
 let currentTab = 'menu'
 let selDate = ''
 let cart = [] // { id, name, category }
+
+// ====== 登录验证 ======
+async function checkAuth() {
+  const token = localStorage.getItem('fc_token')
+  const role = localStorage.getItem('fc_role')
+  if (!token || !role) { window.location.href = 'login.html'; return }
+  try {
+    const res = await fetch(API_BASE + '/api/verify-token', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token })
+    })
+    const data = await res.json()
+    if (!data.valid) { localStorage.clear(); window.location.href = 'login.html' }
+  } catch(e) { window.location.href = 'login.html' }
+}
+
+function logout() {
+  localStorage.clear()
+  window.location.href = 'login.html'
+}
+
+checkAuth()
 
 async function fetchData() {
   try { const r=await fetch('/api/data'); if(r.ok) allData=await r.json() } catch(e) {}
@@ -188,23 +213,123 @@ function renderMenu() {
   let main = `<div class="menu-main"><div class="menu-main-title" style="color:${CAT_COLOR[menuCat]||'#FF6B35'}">${CAT_EMOJI[menuCat]||'📦'} ${menuCat}<span>${filtered.length}道</span></div>
     <div class="recipe-grid">`
   filtered.forEach(r => {
-    main += `<div class="rcard" onclick="addToCart('${r.id}','${r.name}','${r.category}')">
+    main += `<div class="rcard" onclick="handleAddToCart('${r.id}')">
       <div class="rcard-img" style="background:${CAT_COLOR[menuCat]||'#FF6B35'}">
         ${CAT_EMOJI[r.category]||'🍳'}
         <span class="rcard-add">+</span>
       </div>
       <div class="rcard-name">${r.name}</div>
+      ${r.flavor?`<div style="font-size:9px;color:#FF6B35;text-align:center;padding:0 4px 6px">${r.flavor}</div>`:''}
+      ${r.flavorNote?`<div style="font-size:9px;color:#999;text-align:center;padding:0 4px 6px;margin-top:-4px">${r.flavorNote}</div>`:''}
     </div>`
   })
   main += `</div></div>`
   return `<div class="menu-layout">${side}${main}</div>`
 }
 
-function addToCart(id, name, cat) {
-  if(cart.find(c=>c.id===id)) { toast('已在购物车中'); return }
-  cart.push({ id, name, category: cat })
+// 处理点菜（弹出对话框选口味+写备注）
+let pendingRecipeId = null
+let pendingFlavor = ''
+
+function handleAddToCart(id) {
+  const recipe = allData.recipes.find(r => r.id === id)
+  const restaurant = (allData.restaurants||[]).find(r => r.id === id)
+  if (recipe) {
+    pendingRecipeId = id
+    pendingFlavor = recipe.flavor || ''
+    showOrderDialog(recipe)
+  } else if (restaurant) {
+    addToCart(restaurant, '', '', '晚餐')
+  }
+}
+
+function showOrderDialog(recipe) {
+  const options = recipe.flavorOptions
+  const defaultFlavor = recipe.flavor || ''
+  let flavorHtml = ''
+  if (options && options.length > 0) {
+    flavorHtml = `<div style="margin-bottom:12px">
+      <div style="font-size:12px;color:#666;margin-bottom:6px;text-align:left">🍲 口味/锅底</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">`
+    options.forEach(f => {
+      flavorHtml += `<span onclick="pickFlavorForOrder('${f}')" id="flv_${f}" style="padding:8px 14px;border-radius:8px;border:2px solid ${f===defaultFlavor?'#FF6B35':'#E8E8E8'};background:${f===defaultFlavor?'#FFF8F5':'white'};color:${f===defaultFlavor?'#FF6B35':'#333'};font-size:13px;cursor:pointer;font-weight:${f===defaultFlavor?'600':'400'}">${f}</span>`
+    })
+    flavorHtml += `</div></div>`
+  }
+
+  let html = `<div style="text-align:center;padding:4px 0 8px">
+    <div style="font-size:18px;font-weight:600;margin-bottom:4px">${recipe.name}</div>
+    <div style="font-size:12px;color:#999;margin-bottom:12px">${recipe.category||''}${defaultFlavor && !options?' · '+defaultFlavor:''}</div>
+    ${flavorHtml}
+    <div style="margin-bottom:12px;text-align:left">
+      <div style="font-size:12px;color:#666;margin-bottom:6px">🍽️ 餐型</div>
+      <div style="display:flex;gap:6px">`
+  const mealTypes = ['早餐','午餐','晚餐','加餐']
+  const mtColors = {'早餐':'#FFA502','午餐':'#FF6B35','晚餐':'#E74C3C','加餐':'#9B59B6'}
+  mealTypes.forEach(mt => {
+    html += `<span onclick="pickMealType('${mt}')" id="mt_${mt}" style="flex:1;padding:8px 0;border-radius:8px;border:2px solid ${mt==='晚餐'?'#E74C3C':'#E8E8E8'};background:${mt==='晚餐'?'#FFF5F5':'white'};color:${mt==='晚餐'?'#E74C3C':'#666'};font-size:13px;cursor:pointer;font-weight:${mt==='晚餐'?'600':'400'}">${mt}</span>`
+  })
+  html += `</div></div>
+    <div style="margin-bottom:12px;text-align:left">
+      <div style="font-size:12px;color:#666;margin-bottom:4px">📝 口味备注（不填则用默认）</div>
+      <textarea id="orderNote" rows="2" style="width:100%;padding:8px 12px;border:2px solid #E8E8E8;border-radius:8px;font-size:13px;outline:none;resize:none;font-family:inherit" placeholder="${recipe.category==='水果'||recipe.category==='饮品'?'例：常温、冰镇':'例：微辣、少盐、免葱'}">${recipe.flavorNote||''}</textarea>
+    </div>
+    <div onclick="confirmAddToCart()" style="padding:12px;border-radius:10px;background:linear-gradient(135deg,#FF6B35,#FF8F47);color:white;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:8px">🛒 加入购物车</div>
+    <div onclick="closeModal()" style="padding:10px;border-radius:10px;background:#F0F0F0;color:#666;font-size:13px;cursor:pointer">取消</div>
+    <input type="hidden" id="orderFlavor" value="${pendingFlavor}">
+    <input type="hidden" id="orderMealType" value="晚餐">
+  </div>`
+  showModal(html)
+}
+
+let pendingMealType = '晚餐'
+
+function pickMealType(mt) {
+  pendingMealType = mt
+  document.getElementById('orderMealType').value = mt
+  document.querySelectorAll('[id^="mt_"]').forEach(el => {
+    const m = el.id.replace('mt_','')
+    const isSel = m === mt
+    const c = {'早餐':'#FFA502','午餐':'#FF6B35','晚餐':'#E74C3C','加餐':'#9B59B6'}[m] || '#E8E8E8'
+    el.style.borderColor = isSel ? c : '#E8E8E8'
+    el.style.background = isSel ? '#FFF5F5' : 'white'
+    el.style.color = isSel ? c : '#666'
+    el.style.fontWeight = isSel ? '600' : '400'
+  })
+}
+
+function pickFlavorForOrder(flavor) {
+  pendingFlavor = flavor
+  document.getElementById('orderFlavor').value = flavor
+  document.querySelectorAll('[id^="flv_"]').forEach(el => {
+    const f = el.id.replace('flv_','')
+    el.style.borderColor = f === flavor ? '#FF6B35' : '#E8E8E8'
+    el.style.background = f === flavor ? '#FFF8F5' : 'white'
+    el.style.color = f === flavor ? '#FF6B35' : '#333'
+    el.style.fontWeight = f === flavor ? '600' : '400'
+  })
+}
+
+function confirmAddToCart() {
+  const recipe = allData.recipes.find(r => r.id === pendingRecipeId)
+  if (!recipe) return
+  const flavor = document.getElementById('orderFlavor')?.value || ''
+  const note = document.getElementById('orderNote')?.value?.trim() || ''
+  const mealType = document.getElementById('orderMealType')?.value || '晚餐'
+  closeModal()
+  addToCart(recipe, flavor, note, mealType)
+}
+
+function addToCart(recipe, flavor, note, mealType) {
+  const id = recipe.id
+  const key = id + '|' + flavor + '|' + note + '|' + (mealType||'')
+  if(cart.find(c=>c._key===key)) { toast('已选择过此组合'); return }
+  cart.push({ _key: key, id, name: recipe.name, category: recipe.category, flavor, flavorNote: note, mealType: mealType || '晚餐' })
   updateCartBadge()
-  toast(`已加入「${name}」`)
+  let label = recipe.name
+  if (flavor) label += ' · ' + flavor
+  if (note) label += ' (' + note + ')'
+  toast(`已加入「${label}」`)
 }
 
 function toast(msg) {
@@ -239,7 +364,7 @@ function renderEatout() {
   let main = `<div class="menu-main"><div class="menu-main-title" style="color:${CAT_COLOR[eatoutCat]||'#FF6B35'}">🍜 下馆子 — ${CAT_EMOJI[eatoutCat]||'📦'} ${eatoutCat}<span>${filtered.length}家</span></div>
     <div class="recipe-grid">`
   filtered.forEach(r => {
-    main += `<div class="rcard" onclick="addToCart('${r.id}','${r.name}','${r.category}')">
+    main += `<div class="rcard" onclick="handleAddToCart('${r.id}')">
       <div class="rcard-img" style="background:#FF6B35">
         🏪
         <span class="rcard-add">+</span>
@@ -260,7 +385,7 @@ function renderCart() {
   cart.forEach((item,i) => {
     html += `<div class="cart-item">
       <div class="cart-item-icon" style="background:${CAT_COLOR[item.category]||'#FF6B35'}">${CAT_EMOJI[item.category]||'🍳'}</div>
-      <div class="cart-item-info"><div class="cart-item-name">${item.name}</div><div class="cart-item-cat">${item.category||''}</div></div>
+      <div class="cart-item-info"><div class="cart-item-name">${item.name}</div><div class="cart-item-cat">${item.category||''}${item.flavor?' · '+item.flavor:''}${item.mealType?' · '+item.mealType:''}${item.flavorNote?'（'+item.flavorNote+'）':''}</div></div>
       <span class="cart-item-del" onclick="removeFromCart(${i})">✕</span>
     </div>`
   })
@@ -284,7 +409,9 @@ async function placeOrder() {
 
   // 不清除已有排程，只追加新点的菜到晚餐
   cart.forEach(item => {
-    plans.push({ date, mealType:'晚餐', recipeId:item.id, recipeName:item.name, note:'', time:Date.now() })
+    let note = item.flavor || ''
+    if (item.flavorNote) note += (note?' · ':'') + item.flavorNote
+    plans.push({ date, mealType: item.mealType || '晚餐', recipeId:item.id, recipeName:item.name, note, time:Date.now() })
   })
 
   allData.mealPlans = plans
@@ -328,9 +455,10 @@ function doPick() {
         <div style="height:140px;background:${CAT_COLOR[picked.category]||'#FF6B35'};display:flex;align-items:center;justify-content:center;font-size:44px">${CAT_EMOJI[picked.category]||'🍳'}</div>
         <div style="background:white;padding:14px 16px;border-radius:0 0 12px 12px">
           <div style="font-size:19px;font-weight:700;color:#2D3436">${picked.name}</div>
-          <div style="font-size:12px;color:#999;line-height:1.6;margin-bottom:6px">${picked.category||''}</div>
+          <div style="font-size:12px;color:#999;line-height:1.6;margin-bottom:6px">${picked.category||''}${picked.flavor?' · '+picked.flavor:''}</div>
+          ${picked.flavorNote?`<div style="font-size:11px;color:#888;margin-bottom:6px">📝 ${picked.flavorNote}</div>`:''}
           ${picked.tips?`<div style="font-size:11px;color:#FF6B35;margin-bottom:10px">💡 ${picked.tips}</div>`:''}
-          <div onclick="addToCart('${picked.id}','${picked.name}','${picked.category}')" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;background:linear-gradient(135deg,#FF6B35,#FF8F47);color:white;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer">🛒 加至已选</div>
+          <div onclick="handleAddToCart('${picked.id}')" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;background:linear-gradient(135deg,#FF6B35,#FF8F47);color:white;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer">🛒 加至已选</div>
         </div>
       </div>`
     picking = false; btn.disabled = false; btn.textContent = '✨ 再换一个'

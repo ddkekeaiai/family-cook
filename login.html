@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>家庭菜谱 - 登录</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{display:flex;justify-content:center;align-items:center;min-height:100vh;background:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:20px}
+.card{background:white;border-radius:20px;padding:32px 28px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.1);max-width:400px;width:100%}
+.logo{margin-bottom:4px}
+.logo span{font-size:48px}
+h1{font-size:22px;color:#FF6B35;margin-bottom:2px}
+.sub{font-size:13px;color:#999;margin-bottom:24px}
+
+/* 角色选择 */
+.role-select{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
+.role-btn{display:flex;align-items:center;gap:14px;padding:16px 20px;border:2px solid #E8E8E8;border-radius:14px;background:white;cursor:pointer;transition:all .2s;text-align:left;width:100%}
+.role-btn:active{transform:scale(.98)}
+.role-btn:hover{border-color:#FF6B35}
+.role-btn .icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.role-btn .icon.member{background:#FFF3ED}
+.role-btn .icon.admin{background:#F0F0F0}
+.role-btn .info{flex:1}
+.role-btn .info .name{font-size:15px;font-weight:600;color:#333}
+.role-btn .info .desc{font-size:12px;color:#999;margin-top:2px}
+.role-btn .arrow{font-size:18px;color:#ccc}
+
+.role-btn.selected{border-color:#FF6B35;background:#FFF8F5}
+.role-btn.selected .icon.admin{background:#FFE4D6}
+.role-btn.selected .icon.member{background:#FFE4D6}
+.role-btn.selected .arrow{color:#FF6B35}
+
+/* 密码输入（现在两个角色都用它） */
+.pwd-section{margin-bottom:12px;display:none}
+.pwd-section.show{display:block;animation:fadeIn .25s}
+.pwd-section input{width:100%;padding:12px 16px;border:2px solid #E8E8E8;border-radius:10px;font-size:15px;outline:none;transition:border .2s;margin-bottom:10px}
+.pwd-section input:focus{border-color:#FF6B35}
+
+/* 角色标识 */
+.role-label{display:flex;align-items:center;gap:6px;margin-bottom:10px;padding:6px 12px;border-radius:8px;background:#F8F8F8;font-size:12px;color:#666}
+.role-label .tag{font-size:11px;padding:1px 8px;border-radius:4px;font-weight:500}
+.role-label .tag.member-tag{background:#FFF3ED;color:#D85A30}
+.role-label .tag.admin-tag{background:#FFE4D6;color:#993C1D}
+
+.pwd-error{font-size:12px;color:#FF4757;margin-bottom:8px;display:none}
+.pwd-error.show{display:block}
+
+/* 按钮 */
+.btn{display:block;width:100%;padding:14px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;border:none}
+.btn-primary{background:linear-gradient(135deg,#FF6B35,#FF8F47);color:white;box-shadow:0 4px 12px rgba(255,107,53,.3)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-back{display:inline-block;margin-top:8px;font-size:11px;color:#ccc;cursor:pointer}
+
+/* 其他 */
+.hint{font-size:12px;color:#999;margin-top:14px;line-height:1.6}
+.hint strong{color:#FF6B35}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo"><span>🍳</span></div>
+  <h1>家庭菜谱</h1>
+  <p class="sub">第一次访问需要密码，之后自动登录</p>
+
+  <div class="role-select">
+    <div class="role-btn" id="btnMember" onclick="selectRole('member')">
+      <div class="icon member">👤</div>
+      <div class="info">
+        <div class="name">家庭成员</div>
+        <div class="desc">浏览菜单、摇一摇吃什么、查看排餐</div>
+      </div>
+      <div class="arrow">→</div>
+    </div>
+    <div class="role-btn" id="btnAdmin" onclick="selectRole('admin')">
+      <div class="icon admin">🔒</div>
+      <div class="info">
+        <div class="name">管理员</div>
+        <div class="desc">管理菜谱、饭店、排程、数据维护</div>
+      </div>
+      <div class="arrow">→</div>
+    </div>
+  </div>
+
+  <div class="pwd-section" id="pwdSection">
+    <div class="role-label" id="roleLabel">
+      <span class="tag" id="roleTag">👤 家庭成员</span>
+      <span>请输入家庭密码</span>
+    </div>
+    <input type="password" id="pwdInput" placeholder="请输入密码" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="pwd-error" id="pwdError">密码错误，请重试</div>
+    <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">进入</button>
+    <div class="btn-back" onclick="goBack()">← 返回选择身份</div>
+  </div>
+
+  <div class="hint" id="defaultHint">
+    首次使用直接点击身份<br>
+    之后扫码自动登录<br>
+    默认管理员密码：<strong>admin123</strong>
+  </div>
+</div>
+
+<script>
+const API_BASE = ''
+
+// 检查是否已有有效的 token（二维码自动登录）
+async function checkExistingLogin() {
+  const token = localStorage.getItem('fc_token')
+  const role = localStorage.getItem('fc_role')
+  if (!token || !role) return
+  try {
+    const res = await fetch(API_BASE + '/api/verify-token', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token })
+    })
+    const data = await res.json()
+    if (data.valid) {
+      if (role === 'admin') window.location.href = 'admin.html'
+      else window.location.href = 'index.html'
+    }
+  } catch(e) {}
+}
+
+let selectedRole = ''
+
+function selectRole(role) {
+  selectedRole = role
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'))
+  document.getElementById('btnMember').classList.toggle('selected', role === 'member')
+  document.getElementById('btnAdmin').classList.toggle('selected', role === 'admin')
+  document.getElementById('defaultHint').style.display = 'none'
+
+  // 更新密码框的标签和占位
+  const tag = document.getElementById('roleTag')
+  const btn = document.getElementById('loginBtn')
+  const input = document.getElementById('pwdInput')
+  if (role === 'member') {
+    tag.className = 'tag member-tag'
+    tag.textContent = '👤 家庭成员'
+    btn.textContent = '浏览菜单'
+    input.placeholder = '请输入家庭密码'
+  } else {
+    tag.className = 'tag admin-tag'
+    tag.textContent = '🔒 管理员'
+    btn.textContent = '进入管理后台'
+    input.placeholder = '请输入管理员密码'
+  }
+
+  document.getElementById('pwdSection').classList.add('show')
+  document.getElementById('pwdError').classList.remove('show')
+  input.value = ''
+  setTimeout(() => input.focus(), 100)
+}
+
+function goBack() {
+  document.getElementById('pwdSection').classList.remove('show')
+  document.getElementById('defaultHint').style.display = 'block'
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'))
+  selectedRole = ''
+  document.getElementById('pwdError').classList.remove('show')
+}
+
+function doLogin() {
+  const pwd = document.getElementById('pwdInput').value.trim()
+  if (!pwd) return
+  const btn = document.getElementById('loginBtn')
+  btn.disabled = true; btn.textContent = '验证中...'
+  document.getElementById('pwdError').classList.remove('show')
+
+  const endpoint = selectedRole === 'admin' ? '/api/login' : '/api/login-member'
+  const redirect = selectedRole === 'admin' ? 'admin.html' : 'index.html'
+  const role = selectedRole === 'admin' ? 'admin' : 'member'
+
+  fetch(API_BASE + endpoint, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pwd })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      localStorage.setItem('fc_token', data.token)
+      localStorage.setItem('fc_role', role)
+      window.location.href = redirect
+    } else {
+      document.getElementById('pwdError').classList.add('show')
+      btn.disabled = false; btn.textContent = selectedRole === 'admin' ? '进入管理后台' : '浏览菜单'
+    }
+  })
+  .catch(() => {
+    document.getElementById('pwdError').textContent = '网络错误，请重试'
+    document.getElementById('pwdError').classList.add('show')
+    btn.disabled = false; btn.textContent = selectedRole === 'admin' ? '进入管理后台' : '浏览菜单'
+  })
+}
+
+checkExistingLogin()
+</script>
+</body>
+</html>
