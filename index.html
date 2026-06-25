@@ -169,8 +169,8 @@ let menuCat = ''
 
 function renderMenu() {
   const recipes = allData.recipes||[]
-  const cats = [...new Set(recipes.map(r=>r.category).filter(Boolean))].sort((a,b)=>CAT_ORDER.indexOf(a)-CAT_ORDER.indexOf(b))
-  if(!menuCat) menuCat = cats[0]||''
+  const cats = CAT_ORDER
+  if(!menuCat || !cats.includes(menuCat)) menuCat = cats[0]||''
 
   let side = `<div class="menu-side">`
   cats.forEach(c => {
