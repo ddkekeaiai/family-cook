@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>家庭菜谱 - 扫码入口</title>
+<title>扫码访问 - 家庭菜单</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{display:flex;justify-content:center;align-items:center;min-height:100vh;background:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:20px}
 .card{background:white;border-radius:20px;padding:30px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.1);max-width:420px;width:100%}
 h1{font-size:22px;color:#FF6B35;margin-bottom:4px}
 .sub{font-size:13px;color:#999;margin-bottom:20px}
-.qrcode{width:200px;height:200px;margin:0 auto 16px;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.qrcode{width:220px;height:220px;margin:0 auto 16px;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.08)}
 .qrcode img{width:100%;height:100%;display:block}
 .urls{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
 .url-btn{display:block;padding:14px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none}
@@ -18,23 +18,24 @@ h1{font-size:22px;color:#FF6B35;margin-bottom:4px}
 .url-btn.admin{background:white;color:#FF6B35;border:2px solid #FF6B35}
 .desc{font-size:12px;color:#999;line-height:1.8;text-align:left;margin-top:16px;padding:12px;background:#F8F8F8;border-radius:8px}
 .desc strong{color:#FF6B35}
+.tag{display:inline-block;padding:2px 8px;background:#2ED573;color:white;border-radius:4px;font-size:10px;margin-left:6px}
 </style>
 </head>
 <body>
 <div class="card">
-  <h1>🍳 家庭菜谱</h1>
-  <p class="sub">请选择您的入口</p>
+  <h1>🍳 家庭菜单</h1>
+  <p class="sub">扫码进入·永久在线</p>
   <div class="qrcode">
-    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://18f6419e997981b8-111-21-2-221.serveousercontent.com/" alt="二维码">
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https://family-cook-production.up.railway.app/" alt="二维码">
   </div>
+  <div style="background:#F0FFF0;border:1px solid #2ED573;border-radius:10px;padding:8px;font-size:11px;color:#2ED573;word-break:break-all;margin-bottom:16px">✅ 永久链接，永不断线</div>
   <div class="urls">
-    <a href="https://18f6419e997981b8-111-21-2-221.serveousercontent.com/" class="url-btn user">📱 用户端 · 扫码查看</a>
-    <a href="https://18f6419e997981b8-111-21-2-221.serveousercontent.com/admin.html" class="url-btn admin">⚙️ 管理端 · Web后台</a>
+    <a href="https://family-cook-production.up.railway.app/" class="url-btn user">📱 用户端 · 扫码点菜</a>
+    <a href="https://family-cook-production.up.railway.app/admin.html" class="url-btn admin">⚙️ 管理端 · 后台管理</a>
   </div>
   <div class="desc">
-    用户端：查看今日菜单、菜品浏览、本周排餐<br>
-    管理端：菜谱管理、排程设置、数据维护<br><br>
-    <strong>用户端仅可查看，所有管理操作请在管理端进行</strong>
+    用户端：🥘 午窗一钵青精饭 · 拣得香薪手自炊 / 🍜 今日不举炊 · 且下馆子去<br>
+    管理端：菜单管理 · 饭店管理 · 排程管理 · 数据备份
   </div>
 </div>
 </body>
