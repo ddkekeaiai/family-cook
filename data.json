@@ -229,61 +229,71 @@
       "id": "res1",
       "name": "亮亮烤肉",
       "category": "烧烤",
-      "tips": ""
+      "tips": "",
+      "location": "浐灞"
     },
     {
       "id": "res2",
       "name": "红旗串串",
       "category": "串火",
-      "tips": ""
+      "tips": "",
+      "location": "浐灞"
     },
     {
       "id": "res3",
       "name": "肯德基",
       "category": "快餐",
-      "tips": ""
+      "tips": "",
+      "location": "浐灞"
     },
     {
       "id": "res4",
       "name": "麦当劳",
       "category": "快餐",
-      "tips": ""
+      "tips": "",
+      "location": "浐灞"
     },
     {
       "id": "res5",
       "name": "成都三味面",
       "category": "粉面",
-      "tips": ""
+      "tips": "",
+      "location": "浐灞"
     },
     {
       "id": "res6",
       "name": "黑七烤面筋",
       "category": "小吃",
-      "tips": ""
+      "tips": "",
+      "location": "浐灞"
     },
     {
       "id": "rest_1781945231416",
       "name": "三顾冒菜",
       "category": "小吃",
-      "tips": ""
+      "tips": "",
+      "location": "浐灞"
     },
     {
       "id": "rest_1781945255882",
       "name": "红酸汤米粉面",
       "category": "粉面",
-      "tips": ""
+      "tips": "",
+      "location": "浐灞"
     },
     {
       "id": "rest_1781945270857",
       "name": "小六汤包",
       "category": "炒菜",
-      "tips": ""
+      "tips": "",
+      "location": "浐灞"
     },
     {
       "id": "rest_1781945442554",
       "name": "益佳香包子",
       "category": "小吃",
-      "tips": ""
+      "tips": "",
+      "location": "浐灞"
     }
   ],
   "mealPlans": [],
