@@ -234,13 +234,11 @@ let pendingFlavor = ''
 function handleAddToCart(id) {
   const recipe = allData.recipes.find(r => r.id === id)
   const restaurant = (allData.restaurants||[]).find(r => r.id === id)
-  if (recipe) {
-    pendingRecipeId = id
-    pendingFlavor = recipe.flavor || ''
-    showOrderDialog(recipe)
-  } else if (restaurant) {
-    addToCart(restaurant, '', '', '晚餐')
-  }
+  const item = recipe || restaurant
+  if (!item) return
+  pendingRecipeId = id
+  pendingFlavor = item.flavor || ''
+  showOrderDialog(item)
 }
 
 function showOrderDialog(recipe) {
@@ -311,13 +309,13 @@ function pickFlavorForOrder(flavor) {
 }
 
 function confirmAddToCart() {
-  const recipe = allData.recipes.find(r => r.id === pendingRecipeId)
-  if (!recipe) return
+  const item = allData.recipes.find(r => r.id === pendingRecipeId) || (allData.restaurants||[]).find(r => r.id === pendingRecipeId)
+  if (!item) return
   const flavor = document.getElementById('orderFlavor')?.value || ''
   const note = document.getElementById('orderNote')?.value?.trim() || ''
   const mealType = document.getElementById('orderMealType')?.value || '晚餐'
   closeModal()
-  addToCart(recipe, flavor, note, mealType)
+  addToCart(item, flavor, note, mealType)
 }
 
 function addToCart(recipe, flavor, note, mealType) {
@@ -416,8 +414,9 @@ async function placeOrder() {
 
   allData.mealPlans = plans
   try {
+    const token = localStorage.getItem('fc_token')
     await fetch('/api/data', {
-      method:'POST', headers:{'Content-Type':'application/json'},
+      method:'POST', headers:{'Content-Type':'application/json', 'Authorization':'Bearer ' + (token||'')},
       body: JSON.stringify({ recipes:allData.recipes, mealPlans:plans, preferences:allData.preferences||{} })
     })
     const count = cart.length
