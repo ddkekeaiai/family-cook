@@ -158,9 +158,9 @@ function weekDates() {
   return Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return fmtDate(d)})
 }
 
-const CAT_EMOJI={'早餐':'🌅','凉菜':'🥗','热菜':'🔥','汤':'🍲','主食':'🍚','水果':'🍎','饮品':'🧃','炒菜':'🥘','小吃':'🥟','烧烤':'🍢','串火':'🍢','粉面':'🍜','快餐':'🍔','其他':'📦'}
-const CAT_COLOR={'早餐':'#FFA502','凉菜':'#2ED573','热菜':'#E74C3C','汤':'#3498DB','主食':'#F39C12','水果':'#FF6B6B','饮品':'#1ABC9C','炒菜':'#E74C3C','小吃':'#FFA502','烧烤':'#D35400','串火':'#E74C3C','粉面':'#F39C12','快餐':'#FF6B35','其他':'#95A5A6'}
-const CAT_ORDER = ['早餐','凉菜','热菜','汤','主食','水果','饮品','其他']
+const CAT_EMOJI={'早餐':'🌅','凉菜':'🥗','热菜':'🔥','家庭火锅':'🍲','汤':'🍲','主食':'🍚','水果':'🍎','饮品':'🧃','炒菜':'🥘','小吃':'🥟','烧烤':'🍢','串火':'🍢','粉面':'🍜','快餐':'🍔','其他':'📦'}
+const CAT_COLOR={'早餐':'#FFA502','凉菜':'#2ED573','热菜':'#E74C3C','家庭火锅':'#E74C3C','汤':'#3498DB','主食':'#F39C12','水果':'#FF6B6B','饮品':'#1ABC9C','炒菜':'#E74C3C','小吃':'#FFA502','烧烤':'#D35400','串火':'#E74C3C','粉面':'#F39C12','快餐':'#FF6B35','其他':'#95A5A6'}
+const CAT_ORDER = ['早餐','凉菜','热菜','家庭火锅','汤','主食','水果','饮品','其他']
 const REST_CAT_ORDER = ['炒菜','小吃','烧烤','串火','粉面','快餐','其他']
 const WD=['日','一','二','三','四','五','六']
 
@@ -194,8 +194,8 @@ let menuCat = ''
 
 function renderMenu() {
   const recipes = allData.recipes||[]
-  const cats = [...new Set(recipes.map(r=>r.category).filter(Boolean))].sort((a,b)=>CAT_ORDER.indexOf(a)-CAT_ORDER.indexOf(b))
-  if(!menuCat) menuCat = cats[0]||''
+  const cats = CAT_ORDER
+  if(!menuCat || !cats.includes(menuCat)) menuCat = cats[0]||''
 
   let side = `<div class="menu-side">`
   cats.forEach(c => {
