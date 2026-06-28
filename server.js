@@ -209,15 +209,7 @@ app.post('/api/change-password', (req, res) => {
   res.json({ success: true, message: '密码已修改' });
 });
 
-// ====== 管理端写接口保护中间件 ======
-function requireAdmin(req, res, next) {
-  const token = req.headers['authorization']?.replace('Bearer ', '');
-  const payload = verifyToken(token);
-  if (!payload || payload.role !== 'admin') {
-    return res.status(401).json({ success: false, message: '请先以管理员身份登录' });
-  }
-  next();
-}
+// ====== 登录认证 API ======
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${PORT}`);

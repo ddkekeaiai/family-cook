@@ -1,32 +1,294 @@
 {
+  "_config": {
+    "adminPasswordHash": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9"
+  },
   "recipes": [
-    {"id":"r1","name":"鱼香肉丝","category":"热菜","tips":"经典川菜，下饭神器"},
-    {"id":"r2","name":"西红柿炒鸡蛋","category":"热菜","tips":"国民家常菜"},
-    {"id":"r3","name":"红烧排骨","category":"热菜","tips":"炖久一点更入味"},
-    {"id":"r4","name":"蒜蓉西兰花","category":"凉菜","tips":"清爽可口"},
-    {"id":"r5","name":"麻婆豆腐","category":"热菜","tips":"麻辣鲜香"},
-    {"id":"r6","name":"紫菜蛋花汤","category":"汤","tips":"简单快手汤"},
-    {"id":"r7","name":"糖醋里脊","category":"热菜","tips":"酸甜可口"},
-    {"id":"r8","name":"水果沙拉","category":"水果","tips":"加一点蜂蜜更好吃"},
-    {"id":"r9","name":"皮蛋瘦肉粥","category":"早餐","tips":"最后淋几滴香油更香"},
-    {"id":"r10","name":"豆浆油条","category":"早餐","tips":"经典早餐搭配"},
-    {"id":"r11","name":"玉米排骨汤","category":"汤","tips":"炖汤的水一次加足"},
-    {"id":"r12","name":"柠檬蜂蜜水","category":"饮品","tips":"水温不要超过60度"}
+    {
+      "id": "r1",
+      "name": "酸辣土豆丝",
+      "category": "热菜",
+      "flavor": "",
+      "flavorOptions": [],
+      "flavorNote": "",
+      "tips": ""
+    },
+    {
+      "id": "r2",
+      "name": "西红柿炒鸡蛋",
+      "category": "热菜",
+      "tips": "国民家常菜"
+    },
+    {
+      "id": "r3",
+      "name": "酸辣排骨",
+      "category": "热菜",
+      "tips": ""
+    },
+    {
+      "id": "r4",
+      "name": "蒜蓉西兰花",
+      "category": "凉菜",
+      "tips": "清爽可口"
+    },
+    {
+      "id": "r5",
+      "name": "辣子豆腐",
+      "category": "热菜",
+      "tips": ""
+    },
+    {
+      "id": "r6",
+      "name": "紫菜蛋花汤",
+      "category": "汤",
+      "tips": ""
+    },
+    {
+      "id": "r7",
+      "name": "孜然牛肉",
+      "category": "热菜",
+      "tips": ""
+    },
+    {
+      "id": "r8",
+      "name": "西瓜",
+      "category": "水果",
+      "tips": ""
+    },
+    {
+      "id": "r9",
+      "name": "胡辣汤",
+      "category": "早餐",
+      "tips": ""
+    },
+    {
+      "id": "r10",
+      "name": "油条",
+      "category": "早餐",
+      "tips": ""
+    },
+    {
+      "id": "r11",
+      "name": "玉米排骨汤",
+      "category": "汤",
+      "tips": ""
+    },
+    {
+      "id": "r12",
+      "name": "椰子水",
+      "category": "饮品",
+      "tips": ""
+    },
+    {
+      "id": "r_1781938778370",
+      "name": "沙茶牛肉粉丝煲",
+      "category": "热菜",
+      "tips": ""
+    },
+    {
+      "id": "r_1781938800014",
+      "name": "红烧牛肉面",
+      "category": "主食",
+      "tips": ""
+    },
+    {
+      "id": "r_1781938808883",
+      "name": "米饭",
+      "category": "主食",
+      "tips": ""
+    },
+    {
+      "id": "r_1781938818247",
+      "name": "炸酱面",
+      "category": "主食",
+      "tips": ""
+    },
+    {
+      "id": "r_1781938826371",
+      "name": "油泼面",
+      "category": "主食",
+      "tips": ""
+    },
+    {
+      "id": "r_1781938836926",
+      "name": "三合一面",
+      "category": "主食",
+      "tips": ""
+    },
+    {
+      "id": "r_1781938844056",
+      "name": "稀饭",
+      "category": "汤",
+      "tips": ""
+    },
+    {
+      "id": "r_1781938856388",
+      "name": "馍",
+      "category": "主食",
+      "tips": ""
+    },
+    {
+      "id": "r_1781938868036",
+      "name": "清炒生菜",
+      "category": "热菜",
+      "tips": ""
+    },
+    {
+      "id": "r_1781938878474",
+      "name": "凉拌黄瓜",
+      "category": "凉菜",
+      "tips": ""
+    },
+    {
+      "id": "r_1781938894086",
+      "name": "豆腐皮粉丝",
+      "category": "凉菜",
+      "tips": ""
+    },
+    {
+      "id": "r_1781938915669",
+      "name": "海米冬瓜",
+      "category": "热菜",
+      "tips": ""
+    },
+    {
+      "id": "r_1781938923541",
+      "name": "水煮牛肉",
+      "category": "热菜",
+      "tips": ""
+    },
+    {
+      "id": "r_1781938939946",
+      "name": "沙茶粉丝虾堡",
+      "category": "热菜",
+      "tips": ""
+    },
+    {
+      "id": "r_1781938995041",
+      "name": "蒜蓉粉丝虾",
+      "category": "热菜",
+      "tips": ""
+    },
+    {
+      "id": "r_1781939003375",
+      "name": "钵钵鸡",
+      "category": "其他",
+      "tips": ""
+    },
+    {
+      "id": "r_1781939040291",
+      "name": "家庭火锅",
+      "category": "其他",
+      "flavor": "",
+      "flavorOptions": [
+        "红酸汤",
+        "麻辣",
+        "清汤"
+      ],
+      "flavorNote": "",
+      "tips": ""
+    },
+    {
+      "id": "r_1781945192693",
+      "name": "西红柿炒西葫芦",
+      "category": "热菜",
+      "flavor": "",
+      "flavorOptions": [],
+      "flavorNote": "",
+      "tips": ""
+    },
+    {
+      "id": "r_1781945282244",
+      "name": "馍",
+      "category": "早餐",
+      "flavor": "",
+      "flavorOptions": [],
+      "flavorNote": "",
+      "tips": ""
+    },
+    {
+      "id": "r_1781945290261",
+      "name": "水煮蛋",
+      "category": "早餐",
+      "flavor": "",
+      "flavorOptions": [],
+      "flavorNote": "",
+      "tips": ""
+    },
+    {
+      "id": "r_1781945302948",
+      "name": "煎馍片",
+      "category": "早餐",
+      "flavor": "",
+      "flavorOptions": [],
+      "flavorNote": "",
+      "tips": ""
+    }
   ],
   "restaurants": [
-    {"id":"res1","name":"老北京炸酱面馆","category":"粉面","tips":"炸酱面一绝"},
-    {"id":"res2","name":"川味轩","category":"炒菜","tips":"水煮鱼很正宗"},
-    {"id":"res3","name":"粤式茶餐厅","category":"小吃","tips":"虾饺烧卖绝了"},
-    {"id":"res4","name":"东北铁锅炖","category":"炒菜","tips":"铁锅炖大鹅"},
-    {"id":"res5","name":"兰州拉面","category":"粉面","tips":"牛肉汤鲜味美"},
-    {"id":"res6","name":"湘赣人家","category":"炒菜","tips":"小炒黄牛肉好吃"},
-    {"id":"res7","name":"巴蜀火锅","category":"串火","tips":"越煮越香"},
-    {"id":"res8","name":"街角炸串摊","category":"小吃","tips":"炸串配啤酒绝了"},
-    {"id":"res9","name":"新疆羊肉串","category":"烧烤","tips":"红柳大串必点"},
-    {"id":"res10","name":"沙县小吃","category":"快餐","tips":"经济实惠"},
-    {"id":"res11","name":"肯德基","category":"快餐","tips":"炸鸡汉堡最快"},
-    {"id":"res12","name":"海底捞","category":"串火","tips":"服务好食材新鲜"}
+    {
+      "id": "res1",
+      "name": "亮亮烤肉",
+      "category": "烧烤",
+      "tips": ""
+    },
+    {
+      "id": "res2",
+      "name": "红旗串串",
+      "category": "串火",
+      "tips": ""
+    },
+    {
+      "id": "res3",
+      "name": "肯德基",
+      "category": "快餐",
+      "tips": ""
+    },
+    {
+      "id": "res4",
+      "name": "麦当劳",
+      "category": "快餐",
+      "tips": ""
+    },
+    {
+      "id": "res5",
+      "name": "成都三味面",
+      "category": "粉面",
+      "tips": ""
+    },
+    {
+      "id": "res6",
+      "name": "黑七烤面筋",
+      "category": "小吃",
+      "tips": ""
+    },
+    {
+      "id": "rest_1781945231416",
+      "name": "三顾冒菜",
+      "category": "小吃",
+      "tips": ""
+    },
+    {
+      "id": "rest_1781945255882",
+      "name": "红酸汤米粉面",
+      "category": "粉面",
+      "tips": ""
+    },
+    {
+      "id": "rest_1781945270857",
+      "name": "小六汤包",
+      "category": "炒菜",
+      "tips": ""
+    },
+    {
+      "id": "rest_1781945442554",
+      "name": "益佳香包子",
+      "category": "小吃",
+      "tips": ""
+    }
   ],
   "mealPlans": [],
-  "preferences": {"liked":[],"disliked":[]}
+  "preferences": {
+    "liked": [],
+    "disliked": []
+  }
 }
