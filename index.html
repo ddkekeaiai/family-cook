@@ -349,7 +349,7 @@ function renderEatout() {
   if (!eatoutLocation) {
     return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:30px 24px">
       <div style="font-size:36px;margin-bottom:12px">📍</div>
-      <div style="font-size:16px;font-weight:600;color:#333;margin-bottom:6px">去哪吃？</div>
+      <div style="font-size:16px;font-weight:600;color:#333;margin-bottom:6px">你在哪？</div>
       <div style="font-size:12px;color:#999;margin-bottom:20px">先选择地点，再看看附近有啥好吃的</div>
       <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:240px">
         <div onclick="eatoutLocation='恒大';render()" style="padding:14px;border-radius:12px;border:2px solid #E8E8E8;text-align:center;font-size:15px;font-weight:600;color:#333;cursor:pointer;background:white" onmouseover="this.style.borderColor='#FF6B35';this.style.background='#FFF8F5'" onmouseout="this.style.borderColor='#E8E8E8';this.style.background='white'">📍 恒大</div>
@@ -374,14 +374,14 @@ function renderEatout() {
   })
   side += `</div>`
 
-  const filtered = restaurants.filter(r=>r.category===eatoutCat)
+  const catFiltered = filtered.filter(r=>r.category===eatoutCat)
   let main = `<div class="menu-main">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div class="menu-main-title" style="margin:0;color:${CAT_COLOR[eatoutCat]||'#FF6B35'}">🍜 ${eatoutLocation} — ${CAT_EMOJI[eatoutCat]||'📦'} ${eatoutCat}<span>${filtered.length}家</span></div>
+      <div class="menu-main-title" style="margin:0;color:${CAT_COLOR[eatoutCat]||'#FF6B35'}">🍜 ${eatoutLocation} — ${CAT_EMOJI[eatoutCat]||'📦'} ${eatoutCat}<span>${catFiltered.length}家</span></div>
       <span onclick="eatoutLocation='';eatoutCat='';render()" style="font-size:11px;color:#999;cursor:pointer;padding:4px 8px;border-radius:6px;border:1px solid #E8E8E8">切换地点</span>
     </div>
     <div class="recipe-grid">`
-  filtered.forEach(r => {
+  catFiltered.forEach(r => {
     main += `<div class="rcard" onclick="handleAddToCart('${r.id}')">
       <div class="rcard-img" style="background:#FF6B35">
         🏪
